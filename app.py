@@ -4,7 +4,7 @@ import base64
 import re
 
 # --- 1. 웹 UI 기본 설정 ---
-st.set_page_config(page_title="FST to AUPRESET Converter", page_icon="🎵", layout="centered")
+st.set_page_config(page_title="FST to AUPRESET Converter", page_icon="logo.png", layout="centered")
 
 # --- 2. 이미지 Base64 변환 함수 ---
 def get_base64_image(image_path):
