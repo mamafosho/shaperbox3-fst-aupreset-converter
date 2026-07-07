@@ -70,12 +70,8 @@ st.markdown(f"""
     .credit-text {{ text-align: center; font-size: 12px; color: #606060 !important; }}
     [data-testid="stHeader"] {{ background: transparent !important; }}
 
-    /* ---------------------------------------------------
-       How to use 슬라이드 패널 CSS 
-       --------------------------------------------------- */
+    /* How to use 슬라이드 패널 CSS */
     #help-toggle {{ display: none; }}
-
-    /* 스트림릿 기본 버튼 스타일과 완벽하게 동일하게 맞춤 */
     .help-btn {{
         display: inline-flex;
         align-items: center;
@@ -83,20 +79,18 @@ st.markdown(f"""
         width: 100%;
         min-height: 38.4px; 
         background-color: transparent;
-        color: #FAFAFA; /* 스트림릿 기본 글자색 (흰색) */
-        border: 1px solid rgba(250, 250, 250, 0.2); /* 스트림릿 기본 테두리 */
+        color: #FAFAFA;
+        border: 1px solid rgba(250, 250, 250, 0.2);
         border-radius: 8px;
         cursor: pointer;
         font-size: 14px;
         font-weight: 400;
         transition: all 0.2s ease;
     }}
-    /* 마우스 오버 시 스트림릿 기본 레드 톤으로 변경 */
     .help-btn:hover {{ 
         border-color: #FF4B4B; 
         color: #FF4B4B; 
     }}
-
     .help-drawer {{
         position: fixed;
         top: 0;
@@ -111,11 +105,9 @@ st.markdown(f"""
         padding: 30px 20px;
         overflow-y: auto;
     }}
-    
     #help-toggle:checked ~ .help-drawer {{
         right: 0; 
     }}
-
     .overlay {{
         position: fixed;
         top: 0; left: 0; width: 100vw; height: 100vh;
@@ -126,12 +118,10 @@ st.markdown(f"""
         visibility: hidden;
         transition: all 0.4s ease;
     }}
-    
     #help-toggle:checked ~ .overlay {{
         opacity: 1;
         visibility: visible;
     }}
-
     .close-btn {{
         color: #A0A0A0;
         font-size: 28px;
@@ -142,19 +132,12 @@ st.markdown(f"""
     }}
     .close-btn:hover {{ color: #FF4B4B; }}
     </style>
-
-    <!-- HTML 구조 주입 (체크박스, 오버레이, 서랍 본체) -->
     <input type="checkbox" id="help-toggle">
     <label for="help-toggle" class="overlay"></label>
-    
     <div class="help-drawer">
         <label for="help-toggle" class="close-btn">×</label>
         <h3 style="color: white; margin-top: 0; margin-bottom: 20px;">{text['help_title']}</h3>
-        
-        <!-- 사용법 이미지 출력 -->
         <img src="data:image/png;base64,{guide_image_base64}" alt="Guide" style="width: 100%; border-radius: 8px;">
-        
-        <!-- 하단 설명 텍스트 (다국어 지원) -->
         <div style="color: #A0A0A0; font-size: 14px; margin-top: 15px; line-height: 1.6; word-break: keep-all;">
             {text['help_desc']}
         </div>
