@@ -38,7 +38,8 @@ if st.session_state.lang == "KOR":
         "error_no_vst": "'{filename}' 파일에서 VST 데이터를 찾을 수 없습니다.",
         "error_no_template": "서버에 template.aupreset 파일이 없습니다. 개발자에게 문의하세요.",
         "help_title": "사용 방법",
-        "help_desc": "로직에서 쉐이퍼박스3키고 사진대로 로드하면되고 밑에 저장 눌러놓으면 AU presets에서 다음부터 바로 불러오기가능"
+        "help_desc": "로직에서 쉐이퍼박스3키고 사진대로 로드하면되고 밑에 저장 눌러놓으면 AU presets에서 다음부터 바로 불러오기가능",
+        "to_ableton": "에이블톤 버전"
     }
 else:
     text = {
@@ -51,7 +52,8 @@ else:
         "error_no_vst": "Could not find VST data in '{filename}'.",
         "error_no_template": "template.aupreset not found on the server. Contact the developer.",
         "help_title": "How to use",
-        "help_desc": "you can also press save button and load it from AU Presets"
+        "help_desc": "you can also press save button and load it from AU Presets",
+        "to_ableton": "for Ableton"
     }
 
 # --- 5. 다크 모드 전용 배경, 텍스트 및 서랍 UI CSS ---
@@ -69,6 +71,20 @@ st.markdown(f"""
     .warn-text {{ font-size: 14px; color: #5CC2F2 !important; line-height: 1.6; font-weight: 500; }}
     .credit-text {{ text-align: center; font-size: 12px; color: #606060 !important; }}
     [data-testid="stHeader"] {{ background: transparent !important; }}
+
+    /* 하단 이동 링크 디자인 */
+    .link-box {{ text-align: center; margin-bottom: 12px; }}
+    .link-box a {{ 
+        font-size: 14px; 
+        color: #5685cc; 
+        text-decoration: none; 
+        font-weight: 600; 
+        transition: all 0.2s ease; 
+    }}
+    .link-box a:hover {{ 
+        color: #FF4B4B; 
+        text-decoration: underline; 
+    }}
 
     /* How to use 슬라이드 패널 CSS */
     #help-toggle {{ display: none; }}
@@ -132,6 +148,7 @@ st.markdown(f"""
     }}
     .close-btn:hover {{ color: #FF4B4B; }}
     </style>
+    
     <input type="checkbox" id="help-toggle">
     <label for="help-toggle" class="overlay"></label>
     <div class="help-drawer">
@@ -221,8 +238,12 @@ if uploaded_files:
 
 # --- 9. 화면 맨 아래 서명(Credit) 추가 ---
 st.markdown(
-    """
+    f"""
     <br><br><br>
+    <div class='link-box'>
+        <!-- ⬇️ 여기에 에이블톤 버전 사이트 링크를 넣어주세요 ⬇️ -->
+        <a href="https://shaperbox3-fst-adg-converter.streamlit.app/" target="_blank">{text['to_ableton']}</a>
+    </div>
     <div class='credit-text'>
         @mamafosho
     </div>
