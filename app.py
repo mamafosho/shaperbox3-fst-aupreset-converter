@@ -1,5 +1,7 @@
 import streamlit as st
 import os
+import base64
+import re
 
 # --- 1. 웹 UI 기본 설정 ---
 st.set_page_config(page_title="FST to AUPRESET Converter", page_icon="🎵", layout="centered")
@@ -57,7 +59,8 @@ if st.session_state.lang == "KOR":
         "upload": ".fst 파일들을 선택하거나 드래그 앤 드롭하세요",
         "result": "### 변환 결과",
         "download": "⬇️ {filename} 다운로드",
-        "error_no_vst": "'{filename}' 파일에서 Mac/Logic용 프리셋 데이터를 찾을 수 없습니다."
+        "error_no_vst": "'{filename}' 파일에서 VST 데이터를 찾을 수 없습니다.",
+        "error_no_template": "서버에 template.aupreset 파일이 없습니다. 개발자에게 문의하세요."
     }
 else:
     text = {
@@ -67,26 +70,28 @@ else:
         "upload": "Drag and drop or select .fst files",
         "result": "### Conversion Results",
         "download": "⬇️ Download {filename}",
-        "error_no_vst": "Could not find Mac/Logic preset data in '{filename}'."
+        "error_no_vst": "Could not find VST data in '{filename}'.",
+        "error_no_template": "template.aupreset not found on the server. Contact the developer."
     }
 
-# --- 6. 핵심 변환 로직 함수 (Logic 전용) ---
-def process_fst_to_aupreset(fst_bytes):
-    # FST 파일 내부에서 로직(Mac)용 plist XML 데이터의 시작과 끝을 찾습니다.
-    start_marker = b'<?xml version="1.0"'
-    end_marker = b'</plist>'
-    
-    start_idx = fst_bytes.find(start_marker)
-    end_idx = fst_bytes.find(end_marker)
-    
-    # XML 데이터를 찾지 못하면 변환 실패 처리
-    if start_idx == -1 or end_idx == -1:
+# --- 6. 핵심 변환 로직 함수 (Logic AUPRESET 용) ---
+def process_fst_data(fst_bytes, template_xml):
+    # 1. FST 파일에서 '#zip#' 시그니처 찾기 (플러그인 데이터 시작점)
+    start_idx = fst_bytes.find(b'#zip#')
+    if start_idx == -1:
         return None
         
-    # 시작점부터 끝점(</plist> 글자 길이 포함)까지 텍스트만 정확하게 잘라냅니다.
-    aupreset_bytes = fst_bytes[start_idx:end_idx + len(end_marker)]
+    # 2. 시작점부터 끝까지 바이너리 데이터 추출
+    vst_chunk_binary = fst_bytes[start_idx:]
     
-    return aupreset_bytes
+    # 3. 추출한 바이너리 데이터를 Base64 규격으로 인코딩 (Apple XML 포맷에 맞춰 자동 줄바꿈)
+    b64_str = base64.encodebytes(vst_chunk_binary).decode('utf-8')
+    
+    # 4. 정규식을 이용해 template.aupreset 내의 <key>jucePluginState</key> 하위 <data> 영역을 방금 만든 b64_str로 덮어쓰기
+    pattern = re.compile(r'(<key>jucePluginState</key>\s*<data>)(.*?)(</data>)', re.DOTALL)
+    final_xml = pattern.sub(r'\g<1>\n' + b64_str + r'\g<3>', template_xml)
+    
+    return final_xml
 
 # --- 7. 메인 화면 렌더링 ---
 st.title(text["title"])
@@ -99,6 +104,15 @@ st.write("")
 st.markdown(f"<div class='warn-text'>{text['warn']}</div>", unsafe_allow_html=True)
 st.write("")
 
+# 템플릿 로드 (Logic 버전)
+template_path = 'template.aupreset'
+try:
+    with open(template_path, 'r', encoding='utf-8') as f:
+        template_xml = f.read()
+except FileNotFoundError:
+    st.error(text["error_no_template"])
+    st.stop()
+
 # 파일 업로더
 uploaded_files = st.file_uploader(text["upload"], type=['fst'], accept_multiple_files=True)
 
@@ -108,16 +122,17 @@ if uploaded_files:
     
     for uploaded_file in uploaded_files:
         fst_bytes = uploaded_file.read()
-        preset_data = process_fst_to_aupreset(fst_bytes)
+        final_xml = process_fst_data(fst_bytes, template_xml)
         
-        if preset_data:
+        if final_xml:
             base_name = os.path.splitext(uploaded_file.name)[0]
-            preset_filename = f"{base_name}.aupreset"
+            # 압축(gzip) 없이 순수 XML 텍스트 포맷으로 aupreset 다운로드
+            aupreset_filename = f"{base_name}.aupreset"
             
             st.download_button(
-                label=text["download"].format(filename=preset_filename),
-                data=preset_data,
-                file_name=preset_filename,
+                label=text["download"].format(filename=aupreset_filename),
+                data=final_xml.encode('utf-8'),
+                file_name=aupreset_filename,
                 mime="application/xml"
             )
         else:
