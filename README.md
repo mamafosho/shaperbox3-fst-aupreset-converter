@@ -1,3 +1,3 @@
 https://shaperbox3-fst-aupreset-converter.streamlit.app/
 
-홍익인간정신으로 널리 이롭게 하라
+i was tired of saving every each shaperbox3 fst presets on fl trial
